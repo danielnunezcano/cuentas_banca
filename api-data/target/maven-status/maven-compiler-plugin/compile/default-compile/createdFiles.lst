@@ -1,0 +1,3 @@
+org\cuentas\data\repository\InteresRepository.class
+org\cuentas\data\repository\MovimientosRepository.class
+org\cuentas\data\repository\CuentasRepository.class
