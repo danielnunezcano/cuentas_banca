@@ -9,7 +9,9 @@ import org.cuentas.core.dto.TransferenciaDto;
 import org.cuentas.core.dto.TypeAccount;
 
 public interface CuentasService {
-	public void agregarCuenta(CuentaDto cuentaDto);
+	public CuentaDto agregarCuenta(CuentaDto cuentaDto);
+	public CuentaDto borrarCuenta(Long id);
+	public List<CuentaDto> listarCuentasHilo();
 	public void deleteCuenta();
 	public CuentaDto cuentasId(Long id);
 	public List<CuentaDto> listarCuentas(TypeAccount type);

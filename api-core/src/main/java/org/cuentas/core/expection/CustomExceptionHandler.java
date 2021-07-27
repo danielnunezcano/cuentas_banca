@@ -1,5 +1,6 @@
 package org.cuentas.core.expection;
 
+import org.hibernate.exception.JDBCConnectionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,4 +15,13 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 				new CustomInformation(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getCustomMessage()),
 				HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	@ExceptionHandler({ JDBCConnectionException.class })
+	public ResponseEntity<CustomInformation> error(JDBCConnectionException ex) {
+		return new ResponseEntity<CustomInformation>(
+				new CustomInformation(HttpStatus.SERVICE_UNAVAILABLE.value(), ex.getMessage()),
+				HttpStatus.SERVICE_UNAVAILABLE);
+	}
+	
+	
 }

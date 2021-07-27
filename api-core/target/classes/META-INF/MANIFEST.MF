@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Built-By: daniel.nunezcano
+Build-Jdk: 16.0.1
+Implementation-Title: api-core
+Implementation-Version: 1.0.0-SNAPSHOT
+Implementation-Vendor-Id: com.banco
+Implementation-URL: http://maven.apache.org
+Created-By: Maven Integration for Eclipse
+

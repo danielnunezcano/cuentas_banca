@@ -37,6 +37,14 @@ public class IntegrationTest {
 		cuentas = UtilsTest.getCuentas();
 		intereses = UtilsTest.getIntereses();
 	}
+	
+	@Test
+	public void adeleteDataTest() {
+		this.cuentasService.deleteInteres();
+		this.cuentasService.deleteMovimientos();
+		this.cuentasService.deleteCuenta();
+
+	}
 
 	@Test
 	public void agregarCuentaTest() {
@@ -154,9 +162,7 @@ public class IntegrationTest {
 
 	@Test
 	public void zdeleteDataTest() {
-		this.cuentasService.deleteInteres();
-		this.cuentasService.deleteMovimientos();
-		this.cuentasService.deleteCuenta();
+		adeleteDataTest();
 
 	}
 

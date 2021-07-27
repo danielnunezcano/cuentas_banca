@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.cuentas.core.dto.Accion;
@@ -16,6 +20,8 @@ import org.cuentas.core.expection.CustomException;
 import org.cuentas.core.mapper.CuentaMapper;
 import org.cuentas.core.mapper.InteresMapper;
 import org.cuentas.core.mapper.MovimientoMapper;
+import org.cuentas.core.threads.HiloAhorro;
+import org.cuentas.core.threads.HiloCorriente;
 import org.cuentas.data.repository.CuentasRepository;
 import org.cuentas.data.repository.InteresRepository;
 import org.cuentas.data.repository.MovimientosRepository;
@@ -23,6 +29,9 @@ import org.cuentas.model.entity.Cuenta;
 import org.cuentas.model.entity.Interes;
 import org.cuentas.model.entity.Movimiento;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -34,15 +43,38 @@ public class CuentasServiceImpl implements CuentasService {
 	private final CuentasRepository cuentasRepository;
 	private final MovimientosRepository movimientosRepository;
 	private final InteresRepository interesRepository;
+	private final HiloAhorro hiloAhorro;
+	private final HiloCorriente hiloCorriente;
 
 	@Override
-	public void agregarCuenta(CuentaDto cuentaDto) {
+	@CachePut(value ="cuentas")
+	public CuentaDto agregarCuenta(CuentaDto cuentaDto) {
 		Cuenta cuenta = CuentaMapper.INSTANCE.cuentaDtoToCuenta(cuentaDto);
+		
 		this.cuentasRepository.save(cuenta);
+		
+		return CuentaMapper.INSTANCE.cuentaToCuentaDto(cuenta);
 
 	}
 	
 	@Override
+	@CacheEvict(value ="cuentas")
+	public CuentaDto borrarCuenta(Long id) {
+
+		Optional<Cuenta> cuenta = this.cuentasRepository.findById(id);
+		
+		if(cuenta.isPresent()) {
+			this.cuentasRepository.deleteById(id);
+			
+			return CuentaMapper.INSTANCE.cuentaToCuentaDto(cuenta.get());
+		}
+		
+		return null;
+
+	}
+	
+	@Override
+	@Cacheable(value ="cuentas")
 	public List<CuentaDto> listarCuentas(TypeAccount type) {
 		List<CuentaDto> listCuentas = new ArrayList<>();
 		if (type != null) {
@@ -59,6 +91,30 @@ public class CuentasServiceImpl implements CuentasService {
 		}
 
 		 return listCuentas;
+	}
+	
+	@Override
+	public List<CuentaDto> listarCuentasHilo() {
+		
+		List<CuentaDto> output = new ArrayList<>();
+		
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		
+		Future<List<CuentaDto>> futureAhorro = executor.submit(hiloAhorro);
+		Future<List<CuentaDto>> futureCorriente = executor.submit(hiloCorriente);
+		System.out.println("procesos");
+		
+		while(!futureAhorro.isDone() && !futureCorriente.isDone()) {
+			try {
+				output.addAll(futureAhorro.get());
+				output.addAll(futureCorriente.get());
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return output;
 	}
 	
 	@Override

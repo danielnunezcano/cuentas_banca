@@ -32,6 +32,8 @@ public class CuentasControllerTest {
 	@Before
 	public void initTests() {
 		doNothing().when(cuentasService).retirarDinero(Mockito.any());
+		Mockito.when(this.cuentasService.agregarCuenta(Mockito.any())).thenReturn(new CuentaDto());
+		Mockito.when(this.cuentasService.borrarCuenta(Mockito.any())).thenReturn(new CuentaDto());
 		doNothing().when(cuentasService).depositarDinero(Mockito.any());
 		doNothing().when(cuentasService).transferencia(Mockito.any());
 		List<MovimientoDto> movimientos = new ArrayList<MovimientoDto>();
@@ -41,8 +43,12 @@ public class CuentasControllerTest {
 
 	@Test
 	public void agregarCuentaTest() {
-		doNothing().when(cuentasService).agregarCuenta(Mockito.any());
 		this.cuentasService.agregarCuenta(new CuentaDto());
+	}
+	
+	@Test
+	public void borrarCuentaTest() {
+		this.cuentasService.borrarCuenta(0l);
 	}
 
 	@Test
